@@ -1,0 +1,26 @@
+# Windows metadata (created by PowerShell when touching Linux files)
+**/Zone.Identifier
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Obsidian vault state (user-specific, machine-local)
+.obsidian/
+
+# Temp / scratch
+temp/
+tmp/
+*.tmp
