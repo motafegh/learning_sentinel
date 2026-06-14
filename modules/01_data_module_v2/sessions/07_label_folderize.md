@@ -4,7 +4,7 @@
 **Session number:** 07 of 36
 **Mode:** Understand (standalone utility — no CLI entry point; called from connectors or scripts)
 **Estimated study time:** 45 min teaching + 15 min Q&A
-**Status:** 🟡 In progress — questions pending
+**Status:** ✅ Complete — answers written
 
 ---
 
@@ -40,13 +40,13 @@ Session 06 covered the connectors strategy pattern. Key concepts: **(1)** `BaseC
 
 ### §0.6 Your answers to Q1–Q4 (to be filled in after you respond)
 
-**Your answer to Q1:** _pending_
+**Your answer to Q1:** If `source_subdir=""` (empty), the `if source_subdir and source_dir.exists()` check is False (empty string is falsy). Step 1 is entirely skipped — no files are moved. Step 2 resolves `source_dir = repo_dir / ""` = `repo_dir`, so it looks for `<id>.sol` at `repo_dir` root. The symlinks point to `../../<id>.sol` (since `source_subdir` is empty string in the relative path). The function still works — useful when the source is already set up with canonical files at root and you don't need a `__source__/` subdirectory.
 
-**Your answer to Q2:** _pending_
+**Your answer to Q2:** Two reasons. First, **deduplication prevention**: without the move, `find_sol_files()` (used in downstream stages) would find BOTH the flat `.sol` files AND the newly-created symlinks, doubling the contract count. Moving the flat files into `__source__/` removes them from the root scan. Second, **stable canonical anchor**: the `__source__/` dir becomes a known location that symlinks can point to. Without it, symlinks would point to the flat file's original location — if a re-ingest reorganizes files, all symlinks break. The move is "turning a flat source into a folderized one" so downstream code treats all sources uniformly.
 
-**Your answer to Q3:** _pending_
+**Your answer to Q3:** In practice, this is **not a bug** for CSV sources. Python's `csv.DictReader` always returns string values — a CSV cell containing `1` (unquoted) is read as the string `"1"`. The check `v in ("1", "true", "True", "yes")` handles all common CSV representations. If a non-CSV data source (e.g., a JSON import) passed integer `1`, it would NOT match, but this function only reads CSV files via `csv.DictReader`. The real data-quality concern is empty cells: `v = (row.get(c, "") or "").strip()` converts `None` → `""` → skip, which is correct.
 
-**Your answer to Q4:** _pending_
+**Your answer to Q4:** `_maybe_folderize()` in `preprocess.py:200-244` is the BRIDGE. When `preprocess_source()` runs, it checks the source's config entry for `labels_csv`. If found, it calls `folderize_by_labels()` BEFORE running the 5-step pipeline. So the full trace is: `sentinel-data preprocess --source dive` → `cli.py:_run_preprocess` → `preprocess_source()` → `_maybe_folderize(raw_dir, entry)` → `folderize_by_labels(repo_dir, labels_csv, ...)` → creates per-class symlinks → THEN `pipeline.run(sol_files)` starts preprocessing. The folderization is a prerequisite for preprocessing, not a separate stage.
 
 ---
 
