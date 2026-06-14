@@ -65,13 +65,13 @@ They are looked up, not recalled.
 
 ### P104 — When the Code Says "STUB", That Is the Truth
 
-**Rule:** the following are STUBS as of 2026-06-12 — do not pretend they
+**Rule:** the following are STUBS as of 2026-06-14 — do not pretend they
 are implemented:
 
-- `sentinel_data/export/` (10-line `__init__.py` + scaffolding only — Stage 7
-  is not wired)
-- `sentinel_data/cli.py:223-229` (label subcommand stub — merger runs from
+- `sentinel_data/cli.py:228-234` (label subcommand stub — merger runs from
   Python)
+- `sentinel_data/ingestion/connectors/{etherscan,huggingface,zenodo}_connector.py`
+  (13-line `NotImplementedError` placeholders — deferred to Stage 1)
 - `sentinel_data/representation/{call_graph,opcode_extractor,pdg_builder}.py`
   (35-line `NotImplementedError` placeholders — deferred to v3.1)
 - `sentinel_data/preprocessing/deduplicator.py` AST near-dup (3rd dedup

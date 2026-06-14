@@ -85,7 +85,16 @@ The pair also enables staleness detection: if `pin` is non-empty and `pin != res
 | `git_connector.py` | 89 | Git clone (full/shallow) + pin checkout + post-clone hooks |
 | `manual_connector.py` | 189 | Staging materialization (zip/dir/glob) + macOS cleanup |
 
-**Why this module exists (P0):** Ingestion is the front door. Every `.sol` file in the dataset enters through one of 5 connectors. The strategy pattern keeps the orchestrator (`ingest.py`) agnostic to *which* connector is used — it calls `.pull()` and gets a `PullResult` back regardless.
+**Why this module exists (P0):** Ingestion is the front door. Every `.sol` file in the dataset enters through one of 5 connectors (2 implemented, 3 stubs). The strategy pattern keeps the orchestrator (`ingest.py`) agnostic to *which* connector is used — it calls `.pull()` and gets a `PullResult` back regardless.
+
+**Connector implementation status:**
+- `git`: ✅ **89 LOC, fully implemented** — clone + pin checkout + `post_clone_cmd`
+- `manual`: ✅ **189 LOC, fully implemented** — zip/dir/glob materialization
+- `etherscan`: ❌ **STUB** — raises `NotImplementedError` (Stage 1 for disl, 514K unlabeled contracts)
+- `huggingface`: ❌ **STUB** — raises `NotImplementedError` (Stage 1 for `slither_audited` / `solidity_defi_vulns`)
+- `zenodo`: ❌ **STUB** — raises `NotImplementedError` (Stage 1 for `zenodo_clear`, record 16910242)
+
+This session covers only the 2 implemented connectors. The 3 stubs follow the same interface pattern — they just lack the `_pull` logic.
 
 ---
 

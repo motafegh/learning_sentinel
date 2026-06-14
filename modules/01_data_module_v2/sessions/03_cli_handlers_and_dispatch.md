@@ -674,10 +674,10 @@ analysis runs from clobbering each other.
 
 ---
 
-## §10 `_run_export` (666-733) — The Export Handler (with STUB)
+## §10 `_run_export` (682-749) — The Export Handler
 
 ```python
-# Learning mode: Understand | Calls chunk_export; full export is wired but the underlying module is STUB
+# Learning mode: Understand | Calls chunk_export; fully implemented (7 modules, 1482 LOC)
 def _run_export(args: argparse.Namespace) -> None:
     from sentinel_data.export import chunk_export
     # ... (load config, resolve split_version + shard_size + output_dir)
@@ -714,22 +714,20 @@ is "ready" if `data/preprocessed/<source>/` exists; otherwise
 it's added to `skipped_sources` with reason `"preprocessed dir
 not found"`. The chunked export only operates on ready sources.
 
-**`chunk_export` is the one real call** — it's defined in
-`export/chunker.py:210` (covered in Session 34). The export
-returns a `Manifest` dataclass with `n_contracts`,
+**`chunk_export` orchestrates all 4 writers** — it's defined in
+`export/chunker.py:151` (237 LOC, fully implemented). The export
+returns an `ExportManifest` dataclass with `n_contracts`,
 `n_contracts_with_reps`, `n_shards`, `artifact_hash`.
 
-**Per module P104 (STUB honesty):** the CLI handler is wired and
-working, but the `export/` subpackage itself has scaffolding only
-(per `README.md:124-126`). The "real" export that worked
-end-to-end in the v2-readiness report (Gate 3) was
-`ml/src/datasets/sentinel_dataset.py` reading the v2 export
-produced manually. The CLI is ready; the underlying module is
-not.
+**The `export/` subpackage is fully implemented** (7 modules, 1482
+LOC total): labels → metadata → graph shards → token shards →
+shard index → artifact hash (Fix A: written before manifest.json).
+`SentinelDatasetExport` at `export/export.py:21` is the consumer-facing
+API. The only CLI STUB is `_run_label` (Stage 3); export is real.
 
 ---
 
-## §11 `_run_freshness` (736-742) — The Thin Utility
+## §11 `_run_freshness` (752-758) — The Thin Utility
 
 ```python
 # Learning mode: Awareness | Thinnest handler in the file

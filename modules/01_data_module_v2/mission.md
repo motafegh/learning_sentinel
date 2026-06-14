@@ -22,7 +22,7 @@ between stages, and the design decisions encoded in the code.
 - **Markdown** format for all learning material (global P20)
 - **Source code is the only source of truth** — no MEMORY.md facts in
   learning material
-- Stage 7 (export) is a STUB; teach the STUB, not how it "would work"
+- Stage 3 label CLI is a STUB (`cli.py:228-234` prints "NOT IMPLEMENTED"); teach the STUB, not how it "would work"
 - 22+ pre-existing test failures in `ml/tests/test_preprocessing.py`
   are out of scope (pre-Stage-7B drift, not blockers)
 

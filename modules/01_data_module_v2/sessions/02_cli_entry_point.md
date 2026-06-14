@@ -26,8 +26,8 @@ orders diverge at indices 5, 8, 9; **(2)** the 9-stage pipeline runs
 ingest → preprocess → represent → label → verify → split → register →
 analyze → export; **(3)** the 3-layer configuration (config.yaml +
 dvc.yaml + pyproject.toml) is the single source of truth, with each
-file playing a distinct role. Stage 7 (export) is a STUB. Stage 3
-label CLI is a STUB.
+file playing a distinct role. Only Stage 3 label CLI is a STUB
+(`cli.py:228-234`); Stage 7 (export) is fully implemented.
 
 ### §0.2 Model answer to Q1 [Pattern]
 

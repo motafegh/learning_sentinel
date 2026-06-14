@@ -32,7 +32,7 @@
 - Three-layer config (config.yaml / dvc.yaml / pyproject.toml) — each with a distinct role
 - v9 schema constants (LOCKED): NODE_FEATURE_DIM=12, NUM_NODE_TYPES=14, NUM_EDGE_TYPES=12, NUM_CLASSES=10
 - One-way dependency rule and why it matters for testability/blast radius
-- Stage 7 (export) is a STUB; Stage 3 label CLI is a STUB
+- Stage 3 label CLI is a STUB (`cli.py:228-234` prints "NOT IMPLEMENTED"; merger runs from Python directly)
 
 **Warm-up recall:** N/A (first session)
 **Challenge questions:** 4 posted (Q1–Q4), answers pending
@@ -40,7 +40,7 @@
 **3 things to lock in:**
 1. Two `class_names()` orders diverge at indices 5, 8, 9; index-aligned work uses representation order
 2. v9 schema constants are LOCKED; changing them requires bumping FEATURE_SCHEMA_VERSION + updating 3+ files
-3. Stage 7 export is a STUB — don't speculate on how it "would work"
+3. Export is fully implemented (7 modules, 1482 LOC); only label CLI handler is a STUB
 
 **Session doc:** [`sessions/01_orientation.md`](./sessions/01_orientation.md)
 
@@ -82,7 +82,7 @@
 - `_run_register`: Catalog SQLite + artifact hash + DatasetVersion
 - `_run_verify`: 5 sub-checkers orchestrated; only stage returning int exit code (`--strict`)
 - `_run_analyze`: 5 analysis tools with `--only` filter; `_resolve_corpus_paths` helper
-- `_run_export`: ready/skipped sources filter; `chunk_export` call (underlying module is STUB)
+- `_run_export`: ready/skipped sources filter; `chunk_export` call (fully implemented, 7 modules)
 - `_run_freshness`: 4-line thin wrapper utility
 - 3-layer defense pattern in orchestrators (verify + analyze)
 

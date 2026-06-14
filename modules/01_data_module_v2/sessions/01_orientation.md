@@ -111,7 +111,7 @@ order.
 `sentinel-data` is a 5-stage transformation pipeline
 (`ingest → preprocess → represent → label → verify`) plus 3
 cross-cutting support systems (`splitting`, `registry`, `analysis`)
-plus 1 final stage (`export` — currently a **STUB**), that turns raw
+plus 1 final stage (`export`) that turns raw
 Solidity from 17 curated corpora into model-ready training artifacts.
 
 ### Numbers (verified 2026-06-12 via `wc -l`)
@@ -181,7 +181,7 @@ flowchart LR
   S6 --> S7["split"]
   S7 --> S8["register"]
   S8 --> S9["analyze"]
-  S9 --> S10["export STUB"]
+  S9 --> S10["export"]
   S10 --> ML["sentinel-ml"]
 ```
 
@@ -197,7 +197,7 @@ flowchart LR
 | split | `contracts_clean.csv` | `data/splits/{train,val,test}.csv` | `split_manifest.json` |
 | register | split CSVs | `data/registry/catalog.sqlite` | YAML mirror |
 | analyze | registry + labels | `data/analysis/complexity_proxy_risk.md` | co-occurrence CSVs |
-| export | registry + representations | `data/exports/*.shard.tar` | manifest *(STUB)* |
+| export | registry + representations | `data/exports/*.shard/` | manifest |
 
 ### Per-stage status (from `README.md:163-178`)
 
@@ -211,13 +211,14 @@ flowchart LR
 | 5a | split | ✅ | `cli.py:_run_split` |
 | 5b | register | ✅ | `cli.py:_run_register` |
 | 6 | analyze | ✅ | `cli.py:_run_analyze` |
-| 7 | export | ⏳ STUB | `cli.py:_run_export` |
+| 7 | export | ✅ | `cli.py:_run_export` |
 | — | freshness | ✅ | utility |
 | — | run (orchestrator) | ✅ | `cli.py:679-690` |
 
-**Per module P104 (STUB honesty):** the export scaffolding is in place
-(`chunker.py`, `writers/*`, `format_schema/v1.yaml`) but the seam is
-not wired. Don't speculate on how it "would work." It doesn't, yet.
+**Export is fully implemented** (7 modules, 1482 LOC total): `chunker.py`
+orchestrates 4 writers (labels → metadata → graph shards → token shards),
+computes artifact hash, and writes manifest.json last (Fix A).
+`SentinelDatasetExport` is the consumer-facing API.
 
 ---
 
@@ -339,13 +340,13 @@ v2 export" use case.
    `graph_schema.py:73-84` AND `labeling/schema/taxonomy.yaml:21-159`
    AND `data/processed/multilabel_index.csv`.
 
-3. **Stage 7 (export) is a STUB.** `export/__init__.py` is 10 lines.
-   Scaffolding is in place but the seam is not wired. Stage 3 label
-   CLI is also a STUB (`cli.py:223-229`; the merger runs from Python
-   today). The working end-to-end is in
-   `ml/src/datasets/sentinel_dataset.py` (16 tests, post-seam-swap).
-   Per module P104: teach the STUB as-is; do not speculate on how it
-   "would work."
+3. **Export is fully implemented** (7 modules, 1482 LOC). `chunker.py`
+   orchestrates all 4 writers (labels → metadata → graph shards →
+   token shards), computes artifact hash, writes manifest.json last
+   (Fix A). `SentinelDatasetExport` is the consumer-facing API.
+   **Stage 3 label CLI IS a STUB** (`cli.py:228-234` prints "NOT
+   IMPLEMENTED"; the merger runs from Python directly). Per module
+   P104: teach the label-CLI STUB as-is; don't speculate.
 
 ---
 

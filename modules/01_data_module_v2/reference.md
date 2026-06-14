@@ -44,9 +44,9 @@ under `data/`.
 | 6 | split (5a) | `sentinel-data split` | `sentinel_data/splitting/` | ✅ |
 | 7 | register (5b) | `sentinel-data register` | `sentinel_data/registry/` | ✅ |
 | 8 | analyze (6) | `sentinel-data analyze` | `sentinel_data/analysis/` | ✅ |
-| 9 | export (7) | `sentinel-data export` | `sentinel_data/export/` | ⏳ STUB (10-line `__init__.py` only) |
+| 9 | export (7) | `sentinel-data export` | `sentinel_data/export/` | ✅ (7 modules, 1482 LOC) |
 | — | (utility) | `sentinel-data freshness` | `sentinel_data/ingestion/freshness.py` | ✅ |
-| — | (orchestrator) | `sentinel-data run [--from-stage STAGE]` | dispatch table `cli.py:679-690` | ✅ |
+| — | (orchestrator) | `sentinel-data run [--from-stage STAGE]` | dispatch table `cli.py:761-772` | ✅ |
 
 **Data flow** (per `docs/architecture.md`):
 
@@ -183,21 +183,24 @@ chunking per global P3 (complex / large / important).**
 | `drift_monitor.py` | 298 | KS test for feature + label distribution |
 | `probe_dataset.py` | (re-export) | → `verification/probe_dataset.py` |
 
-### 3.10 `sentinel_data/export/` — Stage 7 (STUB)
+### 3.10 `sentinel_data/export/` — Stage 7 (Fully Implemented)
+
+The export subpackage is **fully implemented** (7 Python files, 1482 LOC total).
+`chunk_export()` orchestrates 4 writers in order: labels → metadata → graph
+shards → token shards → shard index → artifact hash (Fix A: computed before
+manifest.json). `SentinelDatasetExport` is the consumer-facing API wrapped by
+the ML-side `SentinelDataset`.
 
 | File | LOC | Role |
 |------|-----|------|
-| `__init__.py` | 10 | Module docstring only |
-| `chunker.py` | 210 | STUB scaffolding |
-| `export.py` | 141 | STUB scaffolding |
-| `graph_writer.py` | 102 | STUB scaffolding |
-| `label_writer.py` | 150 | STUB scaffolding |
-| `metadata_writer.py` | 200 | STUB scaffolding |
-| `token_writer.py` | (read) | STUB scaffolding |
-| `format_schema/v1.yaml` | (read) | Planned format schema |
-
-> All Stage 7 code is in place but the seams are not yet wired to the v2 export
-> flow. The actual export that worked is in `ml/_archive/seam_swap_pre_2026-06-12/`.
+| `__init__.py` | 27 | 9 exports: ExportManifest, chunk_export, SentinelDatasetExport, 4 writers |
+| `chunker.py` | 237 | `chunk_export()` — orchestrates all 4 writers + manifest.json (Fix A) |
+| `export.py` | 173 | `SentinelDatasetExport` — consumer-facing API, manifest loading/verification |
+| `graph_writer.py` | 106 | `write_graphs_shards` — PyG graph shards |
+| `label_writer.py` | 150 | `write_labels_parquet` — parquet with class columns |
+| `metadata_writer.py` | 200 | `write_metadata_parquet` — metadata per contract |
+| `token_writer.py` | 95 | `write_tokens_shards` — CodeBERT token shards |
+| `format_schema/v1.yaml` | 494 | Format specification for the export artifact |
 
 ---
 
@@ -399,16 +402,18 @@ work without the CLI.
 - **ReentrancyStudy** (230K single-class) — recreates BCCC imbalance
 - **Code4rena scraper** — replaced by Bastet (legal risk)
 
-### 7.3 Stage 7 STUB
+### 7.3 Stage 7 — Fully Implemented
 
-`sentinel_data/export/` has scaffolding code (chunker, writers, format_schema)
-but the `__init__.py` is 10 lines and the seam is not yet wired. The
-seam-swap already done in `ml/src/datasets/sentinel_dataset.py` (16 tests
-pass) is the working end-to-end proof.
+`sentinel_data/export/` is **fully implemented** (7 modules, 1482 LOC).
+`chunk_export()` orchestrates labels → metadata → graph shards → token
+shards → shard index → artifact hash → manifest.json (Fix A: hash before
+manifest). `SentinelDatasetExport` is the consumer-facing API.
 
 ### 7.4 Stage 3 CLI STUB
 
-`cli.py:223-229` is a stub. The merger runs from Python today.
+`cli.py:228-234` prints "NOT IMPLEMENTED". The merger runs from Python
+directly. The CLI handler is the only stub — the labeling module itself
+(`gate.py`, `merger.py`, `crosswalks/`, `parsers/`, `schema/`) is real.
 
 ### 7.5 Representation v3.1 Stubs
 
@@ -485,7 +490,7 @@ When something changes in this module, update the spec files **in this order**:
 | 31 | Registry: diff + lineage | `registry/dataset_diff.py` + `lineage_tracker.py` | 1 hr | Per-class metric projection + DAG |
 | 32 | Analysis: feature_dist | `analysis/feature_dist.py` (436) | 1.5 hr | ⭐ The "Run 9 failure catcher" |
 | 33 | Analysis: rest | `analysis/balance_viz.py` + `cooccurrence.py` + `overlap_detector.py` + `drift_monitor.py` | 1.5 hr | 4 read-only tools |
-| 34 | Export: STUB | `export/__init__.py` + 6 stub files | 30 min | Awareness only — Stage 7 is not yet implemented |
+| 34 | Export deep-dive | `export/chunker.py` + `export.py` + 4 writers + `format_schema/v1.yaml` | 1 hr | Overview (already covered in Sessions 03-04); read the 4 writers + format spec |
 | 35 | ADRs + design rationale | `docs/decisions/ADR-0001-*.md` + `ADR-0002-*.md` + `docs/v2-readiness-2026-06-12.md` | 1 hr | Why this package exists, what bugs existed at build start, the 7-gate check |
 | 36 | Tests deep-dive | `tests/test_representation/test_byte_identical_regression.py` + `tests/test_verification/test_bccc_regression.py` + `ml/tests/test_sentinel_dataset.py` | 1.5 hr | The 5 critical tests — understand the merge gates |
 
