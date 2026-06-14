@@ -4,7 +4,7 @@
 **Session number:** 08 of 36
 **Mode:** Understand (core pipeline — serial 5-step per-file processing)
 **Estimated study time:** 60 min teaching + 20 min Q&A
-**Status:** 🟡 In progress — questions pending
+**Status:** ✅ Complete
 
 ---
 
