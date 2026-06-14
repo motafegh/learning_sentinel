@@ -168,3 +168,27 @@
 3. Manual connector "symlink" mode for zips = extract to `__zip_extracted/` + symlink; preserves option to delete symlink without re-extracting
 
 **Session doc:** [`sessions/06_ingestion_connectors.md`](./sessions/06_ingestion_connectors.md)
+
+---
+
+### Session 07 — Ingestion Label Folderize (`ingestion/label_folderize.py`)
+
+**File:** `ingestion/label_folderize.py` (173 LOC, 1 function + 1 dataclass)
+**Status:** 🟡 In progress — questions pending (Q1–Q4)
+**Concepts taught:**
+- Problem: DAPP datasets (DIVE, SmartBugs Wild, Bastet) distribute labels in separate CSV files, not folder structure
+- `FolderizationResult` dataclass: 6 metrics (contracts_seen, symlinks_created, classes_present, multi_label, unparseable_labels, files_moved)
+- Step 1: move flat `.sol` files from `repo_dir` root into `__source__/` (idempotent — stragglers only on re-run)
+- Step 2: read CSV, create per-class symlinks; multi-label contracts get symlinks in multiple class folders
+- `source_subdir` adapts to source type: `"__source__"` for flat (DIVE), `"buggy_contracts"` for folderized (SolidiFI)
+- Not a CLI stage — support utility called from connector or script
+
+**Warm-up recall:** Session 06 concepts (connector materialization, find_sol_files, extra dict)
+**Challenge questions:** 4 posted (Q1–Q4), answers pending
+**Audit flags raised:** none
+**3 things to lock in:**
+1. `label_folderize` is NOT a CLI stage — support utility bridging flat-source datasets to expected folder structure
+2. Two-step process: move (Step 1) then symlink (Step 2); idempotent on re-run
+3. `source_subdir` adapts: flat sources use `"__source__"` (files moved), folderized use existing subdir name (files stay put)
+
+**Session doc:** [`sessions/07_label_folderize.md`](./sessions/07_label_folderize.md)

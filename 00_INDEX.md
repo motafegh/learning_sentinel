@@ -40,7 +40,7 @@ canonical opencode skills location) — not inside `learning_sentinel/`.
 
 | # | Folder | Source path in `~/projects/sentinel/` | Status | Mission | Progress | Module prefs |
 |---|--------|----------------------------------------|--------|---------|----------|--------------|
-| 01 | `01_data_module_v2/` | `data_module/` | 🔄 | [→](modules/01_data_module_v2/mission.md) | **5/36** completed (Sessions 01–05 done, Session 06 in progress) | [P101–P110](modules/01_data_module_v2/preferences.md) |
+| 01 | `01_data_module_v2/` | `data_module/` | 🔄 | [→](modules/01_data_module_v2/mission.md) | **6/36** completed (Sessions 01–06 done, Session 07 in progress) | [P101–P110](modules/01_data_module_v2/preferences.md) |
 | 02 | `02_preprocessing_ml/` | `ml/src/preprocessing/` | ⬜ | — | — | — |
 | 03 | `03_data_extraction_ml/` | `ml/src/data_extraction/` | ⬜ | — | — | — |
 | 04 | `04_datasets_ml/` | `ml/src/datasets/` | ⬜ | — | — | — |
