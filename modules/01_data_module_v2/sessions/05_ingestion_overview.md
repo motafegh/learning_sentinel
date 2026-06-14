@@ -4,7 +4,7 @@
 **Session number:** 05 of 36
 **Mode:** Understand (first subpackage deep-dive; strategy pattern preview for Session 06)
 **Estimated study time:** 1 hr teaching + 15 min Q&A
-**Status:** 🟡 In progress — questions pending
+**Status:** ✅ Completed
 
 ---
 
@@ -135,13 +135,13 @@ detail that could confuse readers. The convention should be: return
 
 ### §0.6 Your answers to Q1–Q4 (to be filled in after you respond)
 
-**Your answer to Q1:** _pending_
+**Your answer to Q1:** The first failed source aborts `ingest_all`. `ConnectorError` propagates uncaught through the for loop in `ingest_all` (no try/except per-source) up to `_run_ingest`, which catches it and prints a user-friendly message. Remaining enabled sources are skipped — this is fail-fast on ingestion. If SolidiFI fails, DIVE and Clear are never attempted.
 
-**Your answer to Q2:** _pending_
+**Your answer to Q2:** `pin` records the configured intent (e.g., `""` = "use HEAD", `"abc123"` = explicit commit). `resolved_pin` records what was actually fetched. The pair distinguishes explicit pinning from HEAD-at-ingest-time. If `pin=""` and `resolved="abc123"`, I know the source was at HEAD when ingested. If `pin="abc123"` but `resolved="def456"`, the pin is stale. Without both, you lose the audit trail.
 
-**Your answer to Q3:** _pending_
+**Your answer to Q3:** `importlib.metadata.version()` queries the **current interpreter** without spawning a subprocess. `pip show` via subprocess would run whatever `pip` is on PATH — potentially a different venv. The data venv and ml venv may have different Slither versions. Principle: when checking the current runtime's packages, use the runtime's own metadata API, not a subprocess that might invoke a different interpreter.
 
-**Your answer to Q4:** _pending_
+**Your answer to Q4:** `_source_config()` collects non-standard config keys into `SourceConfig.extra` (lines 41-46). The `source_cfg` is passed to `connector.pull(source_cfg, raw_dir)` (line 78 of `ingest.py`). `BaseConnector.pull()` delegates to `self._pull(cfg, dest)` (line 55 of `base.py`). The connector's `_pull()` reads `cfg.extra` — e.g., `ManualConnector._pull` does `extra = cfg.extra or {}` then `extra.get("staging_path")`. The `extra` dict is the type-safe bypass: source-specific keys flow through without modifying the `SourceConfig` schema.
 
 ---
 

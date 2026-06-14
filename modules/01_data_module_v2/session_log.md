@@ -124,7 +124,7 @@
 ### Session 05 — Ingestion Overview (`ingestion/ingest.py` + `manifest.py` + `freshness.py`)
 
 **File:** `ingestion/ingest.py` (113 LOC) + `manifest.py` (111 LOC) + `freshness.py` (120 LOC)
-**Status:** 🟡 In progress — questions pending (Q1–Q4)
+**Status:** ✅ Completed (answers filled)
 **Concepts taught:**
 - `_all_sources` merges 3 config sections (critical_path → additive → legacy) in override order
 - `_source_config` converts raw config dict to typed `SourceConfig` dataclass; `extra` dict catches source-specific keys
@@ -135,7 +135,7 @@
 - Audit flag A#001: manifest verified at preprocessing but not at representation
 
 **Warm-up recall:** Session 04 concepts (dispatch dict, `run` mode default Namespace, 3-branch `main()`)
-**Challenge questions:** 4 posted (Q1–Q4), answers pending
+**Challenge questions:** 4 posted (Q1–Q4), answers filled in §0.6
 **Audit flags raised:** A#001 (manifest not verified at representation entry)
 **3 things to lock in:**
 1. Manifest is append-only with SHA-256 per file — the audit trail for "what version did we train on?"
@@ -143,3 +143,28 @@
 3. Freshness check is informational — Slither check exists because API changes broke Run 9
 
 **Session doc:** [`sessions/05_ingestion_overview.md`](./sessions/05_ingestion_overview.md)
+
+---
+
+### Session 06 — Ingestion Connectors (`connectors/base.py` + `git_connector.py` + `manual_connector.py`)
+
+**File:** `connectors/base.py` (95 LOC) + `__init__.py` (38 LOC) + `git_connector.py` (89 LOC) + `manual_connector.py` (189 LOC)
+**Status:** 🟡 In progress — questions pending (Q1–Q4)
+**Concepts taught:**
+- Strategy pattern: `BaseConnector` ABC, `_pull()` template method, `find_sol_files()` shared static method
+- Registry pattern: `_REGISTRY` dict (7 entries → 5 unique connectors) + `get_connector()` factory
+- Git clone strategy: full clone (pinned) vs shallow clone (unpinned); idempotent re-runs skip cloning
+- Manual materialization: 3 cases (zip → extract + symlink/copy, dir → symlink/copy, glob → resolve then handle)
+- `post_clone_cmd` via `cfg.extra` for scabench's `python checkout_sources.py`
+- macOS `__MACOSX/` stripping in zips (DIVE: 44k zip entries, 22k .sol, 22k macOS noise)
+- Zip-slip defense in `_extract_zip`
+
+**Warm-up recall:** Session 05 concepts (extra dict flow, manifest contract, pin vs resolved_pin)
+**Challenge questions:** 4 posted (Q1–Q4), answers pending
+**Audit flags raised:** none
+**3 things to lock in:**
+1. `find_sol_files` is shared by all connectors; `include_subdirs` limits search space, `exclude_subdirs` filters results
+2. Git connector: pinned → full clone (history needed for checkout), unpinned → shallow `--depth 1` (speed)
+3. Manual connector "symlink" mode for zips = extract to `__zip_extracted/` + symlink; preserves option to delete symlink without re-extracting
+
+**Session doc:** [`sessions/06_ingestion_connectors.md`](./sessions/06_ingestion_connectors.md)
