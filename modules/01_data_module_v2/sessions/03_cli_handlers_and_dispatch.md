@@ -368,6 +368,18 @@ def _run_split(args: argparse.Namespace) -> None:
         apply_strategy, stratified_split, write_manifest, write_splits,
     )
     # ... (load config, resolve data_dir)
+
+    # Load graph-hash dedup groups if available (fixes Level-3 stub)
+    dedup_groups_path = data_dir / "dedup_groups_graph_hash.json"
+    cid_to_group: dict[str, str] = {}
+    if dedup_groups_path.exists():
+        dg_data = json.loads(dedup_groups_path.read_text())
+        cid_to_group = dg_data.get("groups", {})
+        print(f"  Loaded {len(cid_to_group)} dedup groups "
+              f"({dg_data.get('n_unique_groups',0)} unique)")
+    else:
+        print(f"  WARNING: dedup_groups not found; dedup_enforcer will be ineffective")
+
     # Read merged labels and build Contract objects
     for p in sorted(merged_dir.glob("*.labels.json")):
         lj = json.loads(p.read_text())
@@ -378,7 +390,7 @@ def _run_split(args: argparse.Namespace) -> None:
         classes = {cls: entry.get("value", 0) for cls, entry in lj.get("classes", {}).items()}
         primary = next((c for c, e in lj.get("classes", {}).items() if e.get("value") == 1), "NonVulnerable")
         n_pos = sum(1 for e in lj.get("classes", {}).items() if e.get("value") == 1)
-        contracts.append(Contract(sha256=sha, source=source, tier=tier, classes=classes, primary_class=primary, n_pos=n_pos))
+        contracts.append(Contract(sha256=sha, source=source, tier=tier, classes=classes, primary_class=primary, n_pos=n_pos, dedup_group=cid_to_group.get(sha)))
     splits = stratified_split(contracts, seed=args.seed)
     apply_dedup_enforcer(splits)
     apply_nonvulnerable_cap(splits, cap=args.nonvuln_cap, seed=args.seed)
@@ -390,19 +402,28 @@ def _run_split(args: argparse.Namespace) -> None:
 **The Contract object builder (lines 263-285)** is a key piece of
 glue code: it transforms the on-disk `.labels.json` shape (per
 `labeling/merger.py`) into the `Contract` dataclass (defined in
-`splitting/splitters.py`). Three things to notice:
+`splitting/splitters.py`). Four things to notice:
 
 - **Source fallback:** `(lj.get("sources") or ["unknown"])[0]` —
   if a label file is missing the `sources` field, fall back to
   `"unknown"`. Defensive.
 - **Tier inference:** the tier is taken from the **first class
-  that is positive** (line 274-277). If a contract has multiple
+  that is positive** (lines 289-292). If a contract has multiple
   positives from different sources, the highest-confidence tier
   wins. This is a heuristic; for multi-source contracts the
   tier field could be a list, but the splitter only needs one.
 - **Primary class:** the first class with `value=1`, or
   `"NonVulnerable"` if none. The `next(... , default)` idiom
   handles the empty case.
+- **Graph-hash dedup groups** (lines 264-276): before building
+  Contract objects, the handler loads `dedup_groups_graph_hash.json`
+  from `data/` — a file written by `sentinel-data compute-dedup-groups`
+  after representation. Each SHA-256 maps to a dedup group ID.
+  If the file doesn't exist, `cid_to_group` stays empty and a
+  WARNING is printed — the `dedup_enforcer` will have no groups
+  to act on (all groups are singletons). This is the "Level-3
+  stub" fix: without dedup groups, cross-source duplicates pass
+  through the splitter undetected.
 
 **The split triumvirate** (lines 290-298):
 
